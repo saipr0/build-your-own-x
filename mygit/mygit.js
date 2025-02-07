@@ -2,7 +2,12 @@
   function Git(name) {
     this.name = name; // repo name
     this.lastCommitId = -1; // Keep track of last commit id.
-    this.HEAD = null; // Reference to last Commit.
+    this.branches = []; // List of all branches.
+
+    let master = new Branch("master", null);
+    this.branches.push(master); // Stores master branch.
+
+    this.HEAD = master; // Head points to current branch.
   }
 
   // let repo = new Git("my-repo");
@@ -17,10 +22,10 @@
 
   Git.prototype.commit = function (message) {
     // Increment last commit id and pass into new commit.
-    let commit = new Commit(++this.lastCommitId, this.HEAD, message);
+    let commit = new Commit(++this.lastCommitId, this.HEAD.commit, message);
 
     // Update HEAD and current branch.
-    this.HEAD = commit;
+    this.HEAD.commit = commit;
 
     return commit;
   };
@@ -30,7 +35,7 @@
 
   Git.prototype.log = function () {
     // Start from HEAD
-    let commit = this.HEAD,
+    let commit = this.HEAD.commit,
       history = [];
 
     while (commit) {
@@ -40,6 +45,15 @@
     return history;
   };
   // Actual command -> $git log
+  
+  Git.prototype.checkout = function (branchName) {
+    
+  }
+  
+  function Branch(name, commit) {
+    this.name = name;
+    this.commit = commit;
+  }
 
   window.Git = Git;
 })();
@@ -53,3 +67,15 @@ let log = repo.log();
 console.assert(log.length === 2); // Should have 2 commits.
 console.assert(!!log[0] && log[0].id === 1); // Commit 1 should be first.
 console.assert(!!log[1] && log[1].id === 0); // And then Commit 0.
+
+console.log("Git.checkout() test");
+repo = new Git("test");
+repo.commit("Initial commit");
+
+console.assert(repo.HEAD.name === "master");
+repo.checkout("testing");
+console.assert(repo.HEAD.name === "testing");
+repo.checkout("master");
+console.assert(repo.HEAD.name === "master");
+repo.checkout("testing");
+console.assert(repo.HEAD.name === "testing");
